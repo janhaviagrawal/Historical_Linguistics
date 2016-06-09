@@ -1,16 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ TKF91 model and homology testing.
+ Paper Implemented: Statistical Alignment: Computational Properties, Homology Testing and Goodness-of-Fit
+ J. Hein, C. Wiuf2, B. Knudsen1, M. B. Mùller3 and G. Wibling3   (Hein2000)
  */
-package historicallinguistcs;
+ 
+package TKF91;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-public class HistoricalLinguistcs {
+public class TKF91 {
 
     double[] equlibriumProb;
     HashMap<Character,Integer> charPosition = new HashMap<Character,Integer>();
@@ -19,127 +20,46 @@ public class HistoricalLinguistcs {
     double lambda = 0.1, mu=0.11,beta;
     public static void main(String[] args)
     {    
-      HistoricalLinguistcs object1 = new HistoricalLinguistcs();
+      TKF91 object1 = new TKF91();
+      
+      //Initializing all the parameters
       object1.equlibriumProb = object1.getEquilibriumProb();
       object1.beta = (1 - Math.exp(object1.lambda - object1.mu))/(object1.mu - object1.lambda*Math.exp(object1.lambda- object1.mu));
       object1.rateMatrix = object1.getRateMatrix();
       object1.charPosition = object1.getCharPosition();
       object1.numberChar = object1.getNumberChar();
       System.out.println("lamba "+ object1.lambda + " mu "+ object1.mu);
-     // while(true)
-      //{
+    
+      // Sequence input from the user  
       Scanner in = new Scanner(System.in);
       String string1,string2;
       System.out.println("Sequence 1");
       string1 = in.nextLine();
-     // System.out.println("Sequence 2");
-     // string2 = in.nextLine();
+      System.out.println("Sequence 2");
+      string2 = in.nextLine();
+      
+      // Calculating the probabilites P(s1), P(s2) and P(s1,s2)
       Double Ps1s2=0.0, Ps1=0.0,Ps2=0.0;
       Ps1 = object1.eqProbString(string1);
-       
-      ArrayList<String> simulatedSet = new ArrayList<String>();// = object1.simulateSet(string1);
-      simulatedSet.add("AGACGAGTAGC");
-      int i=0;
-      while(i<simulatedSet.size())
-      {
-          string2 = simulatedSet.get(i);
-          System.out.println(string2);
-          Ps2 = object1.eqProbString(string2);
-          Ps1s2 = object1.probCalculation(string1, string2) * Ps1;
-          System.out.println("Probability P(s1,s2) is "+ Ps1s2);
-          double stat;
-          stat =-2 * Math.log(Ps1s2/(Ps1*Ps2));
-          System.out.println("Statistic for homology testing U is "+ stat);
-          System.out.println();
-          i++;
-      }
+      Ps2 = object1.eqProbString(string2);
+      Ps1s2 = object1.probCalculation(string1, string2) * Ps1;
+      System.out.println("Probability P(s1,s2) is "+ Ps1s2);
       
-         
-        
-//      
-//      Ps1s2 = object1.mostProbCalculation(string1, string2) * Ps1;
-//      System.out.println("Probability P(s1,s2) for most probable alignment is "+ Ps1s2);
-//      stat =-2 * Math.log(Ps1s2/(Ps1*Ps2));
-//      System.out.println("Statistic for homology testing U is "+ stat);
-     // }
-    }
-    public List<String> simulateSet(String root)
-    {
-        ArrayList<String> simulatedString = new ArrayList<String>();
-        int i=0;
-        String temp = root;
-        while(i<20)
-        {
-            temp = mutateString(root);
-            temp = performInsertion(temp);
-            temp = performDeletion(temp);
-            simulatedString.add(temp);
-            i++;
-        }
-        return simulatedString;
+      //Statistics for homology testing -2*ln(P(s1,s2)/P(s1)P(s2))
+      double stat;
+      stat =-2 * Math.log(Ps1s2/(Ps1*Ps2));
+      System.out.println("Statistic for homology testing U is "+ stat);
+      System.out.println();
     }
     
-    public String mutateString(String root)
-    {
-        int i=0;
-        int j=0;
-        char temp;
-        Random rand = new Random();
-        StringBuffer newString = new StringBuffer(root);
-        while(i<root.length())
-        {
-            j = rand.nextInt(4);
-            temp = numberChar.get(j);
-            newString.setCharAt(i, temp); 
-            i++;
-        }
-        return newString.toString();
-    }
-    
-    public String performInsertion(String root)
-    {
-        Random rand = new Random();
-        int ins = rand.nextInt(30);
-        StringBuffer strng = new StringBuffer(root);
-        strng.setLength(ins + root.length());
-        int i =0,j=0,k=0;
-        char temp;
-        while(i<ins)
-        {
-            j = rand.nextInt(4);
-            temp = numberChar.get(j);
-          
-            k = rand.nextInt(strng.length());
-            // System.out.println(i + " "+ ins + "  "+ strng.length() + " " +k);
-            strng.insert(k,temp);
-            i++;
-        }
-        return strng.toString();
-    }
-    
-    public String performDeletion(String root)
-    {
-         Random rand = new Random();
-        int del = rand.nextInt(Math.min(30,root.length()));
-        StringBuffer strng = new StringBuffer(root);
-        int i =0,k=0;
-        while(i<del)
-        {
-            k = rand.nextInt(strng.length());          
-            strng.deleteCharAt(k);
-            i++;
-        }
-              
-        return strng.toString().trim().replaceAll("[^a-zA-Z]", "");
-      
-    }
-    
+   
+    //@getRateMatrix function returns the rate matrix for the alphabets
     public double[][] getRateMatrix()
     {
         double[][] rateMatrix = {{-0.3,0.1,0.1,0.1},{0.1,-0.3,0.1,0.1},{0.1,0.1,-0.3,0.1},{0.1,0.1,0.1,-0.3}};
         return rateMatrix;
     }
-    
+    //@getEquilibriumProb function return the equilibrium probability for the alphabets
     public double[] getEquilibriumProb()
     {
         double[] equlibriumProb = {0.25,0.25,0.25,0.25};
@@ -156,16 +76,9 @@ public class HistoricalLinguistcs {
         return charPosition;
     }
     
-    public HashMap<Integer,Character> getNumberChar()
-    {
-        HashMap<Integer,Character> charPosition = new HashMap<Integer,Character>();
-        charPosition.put(0,'A');
-        charPosition.put(1,'C');
-        charPosition.put(2,'G');
-        charPosition.put(3,'T');
-        return charPosition;
-    }
     
+    //@probCalculation function returns the P(a|b) where a and b are sequences by summing over all probability of all possible statiscal alignment paths
+    // Model implemented from the Hein2000 paper
     public double probCalculation(String string1, String string2) 
     {  
         //Base case
@@ -191,12 +104,12 @@ public class HistoricalLinguistcs {
        return term1 + term2;   
     }
     
+    //@mostProbCalculation returns the probabilty of most probable alignment path between the two sequences
      public double mostProbCalculation(String string1, String string2) 
     {  
         //Base case
        if(string1.length()==0)
        {
-         //  System.out.println(string1);
            double eqProb= eqProbString(string2);
            return eqProb*immortalDescendant(string2.length());
        }
@@ -218,30 +131,11 @@ public class HistoricalLinguistcs {
            {
                term2 = probCalculation(string1.substring(0,i),string2.substring(0,j-k)) * temp;
                storeK=k;
-               if(temp1>temp2)
-               {
-                   //printString = string1.substring(0,i-1) + string2.charAt(j-k) + string2.substring(Math.min(j+1, j-k+1), j+1);
-               }
-               else
-               {
-                //  printString = string1.substring(0,i-1) + string2.substring( j-k, j+1);
-
-               }
            }
-       }
-       /*
-       if(term1>term2)
-       {
-           System.out.println(string1.substring(0,i-1));
-       }
-       else
-       {
-           
-           System.out.println(printString);
-       }*/
        return Math.max(term1, term2);   
     }
     
+    //@eqProbString function returns the probabilty of a given sequence
     public double eqProbString(String s1)
     {
          double eqProb=1;
@@ -255,13 +149,14 @@ public class HistoricalLinguistcs {
          return eqProb*(1-lambda/mu);
     }
     
+    //@getsubProb returns the substitution probability of alphabets given the rate matrix
     public double getSubProb(char a, char b)
     {
         int pos1 = charPosition.get(a);
         int pos2 = charPosition.get(b);        
         return Math.exp(rateMatrix[pos1][pos2]);
     }
-    
+   //@mortalDescendant function finds the probability of mortal link surviving and leaving k descendant behind 
     public double mortalDescendant(int k)
     {
         if(k==0)
@@ -269,7 +164,8 @@ public class HistoricalLinguistcs {
         
         return Math.exp(mu)*(1 - lambda*beta)*Math.pow(lambda*beta, k-1);
     }
-    
+
+//@mortalDescendant function finds the probability of immortal link surviving and leaving k descendant behind
      public double immortalDescendant(int k)
     {   
         if(k==0)
@@ -277,7 +173,8 @@ public class HistoricalLinguistcs {
         
         return (1 - lambda*beta)*Math.pow(lambda*beta, k-1);
     }
-     
+    
+     //@mortalDescendant function finds the probability of mortal link not surviving and leaving k descendant behind 
       public double noMortalDescendant(int k)
     {
         if(k==0)
